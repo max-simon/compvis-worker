@@ -1,7 +1,8 @@
 # add paths
 import sys
-sys.path = ['', '/home/www-data-login/anaconda3/lib/python36.zip', '/home/www-data-login/anaconda3/lib/python3.6', '/home/www-data-login/anaconda3/lib/python3.6/lib-dynload', '/home/www-data-login/anaconda3/lib/python3.6/site-packages', '/home/www-data-login/anaconda3/lib/python3.6/site-packages/torchvision-0.2.1-py3.6.egg']
-sys.path.append("/home/www-data-login/visart_2018/cbir_1.0_master/source")
+# sys.path = ['', '/home/www-data-login/anaconda3/lib/python36.zip', '/home/www-data-login/anaconda3/lib/python3.6', '/home/www-data-login/anaconda3/lib/python3.6/lib-dynload', '/home/www-data-login/anaconda3/lib/python3.6/site-packages', '/home/www-data-login/anaconda3/lib/python3.6/site-packages/torchvision-0.2.1-py3.6.egg']
+# sys.path.append("/home/www-data-login/visart_2018/cbir_1.0_master/source")
+sys.path.append("/export/home/www-data-login-cv/visart_2018/cbir_1.0_master/source")
 
 import json, multiprocessing, requests, os, time, yaml, logging
 from enum import Enum
@@ -60,6 +61,7 @@ def data_merge(a, b):
 
 # function to change group of a folder and get permissions
 def own_that_fXXXing_folder(path):
+    return
     subprocess.call(['echo "yC57QAf" | sudo -S chgrp -R www-data-login {:s}'.format(path)], shell = True)
     subprocess.call(['echo "yC57QAf" | sudo -S chmod -R g+w  {:s}'.format(path)], shell = True)
 
@@ -70,7 +72,7 @@ def own_that_fXXXing_folder(path):
 class Worker:
 
     API_TOKEN = '' # authenticate at API
-    DATA_ROOT = '/media/dataDrive/www/dataNewInterface' # root folder for indices and searches
+    DATA_ROOT = '/export/home/www-data-login-cv/dataNewInterface' # root folder for indices and searches
     TYPE = 0 # type of worker --> Index-Worker
 
     def __init__(self, id, main_config_path, description):
@@ -149,10 +151,14 @@ class Worker:
             resp = self.request({
 
             })
-            # ... check if should cancel 
-            if resp["action"] == "cancel":
-                logging.debug('Webserver requested end of job, terminate process now')
-                self.proc.terminate()
+            # ... check if should cancel
+            try:
+                if resp["action"] == "cancel":
+                    logging.debug('Webserver requested end of job, terminate process now')
+                    self.proc.terminate()
+            except KeyError:
+                logging.error("No action specified in response")
+                logging.error(str(resp))
             # ... if not running, get out of loop
             if not self.proc.is_alive():
                 break
